@@ -6,7 +6,7 @@ import cors from 'cors';
 import { connectMongoDB } from './db/connectMongoDB.js';
 import { notFoundHandler } from './middleware/notFoundHandler.js';
 import { errorHandler } from './middleware/errorHandler.js';
-import { notesRouter } from './routes/notesRoutes.js';
+import { notesRouterExport } from "./routes/notesRoutes.js";
 
 
 await connectMongoDB();
@@ -16,7 +16,7 @@ const app = express();
 app.use(logger);
 app.use(express.json());
 app.use(cors());
-app.use("/notes", notesRouter);
+app.use("/", notesRouterExport);
 app.use(notFoundHandler); 
 app.use(errorHandler);
 
