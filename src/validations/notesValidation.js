@@ -6,7 +6,7 @@ import { TAGS } from "../constants/tags.js";
 
 const objectIdCustomValidator = (value, helpers) => {
   if (!mongoose.isValidObjectId(value)) {
-    return helpers.message("Невалідний ID нотатки");
+    return helpers.message("Invalid note ID");
   }
   return value;
 };
@@ -18,7 +18,7 @@ export const createNoteSchema = {
     [Segments.BODY]: Joi.object({
         title: Joi.string().trim().min(1).required(),
         content: Joi.string().trim().allow('').optional(),
-        tag: Joi.string().valid(...TAGS).default('Todo')
+        tag: Joi.string().valid(...TAGS).optional()
     })
 };
 

@@ -1,14 +1,5 @@
-import Note from '../models/note.js';
+import { Note } from '../models/note.js';
 import createHttpError from 'http-errors';
-
-export async function getAllNotes(req, res, next) {
-  try {
-    const notes = await Note.find();
-    res.status(200).json(notes);
-  } catch (error) {
-    next(error);
-  }
-}
 
 export async function getNoteById(req, res, next) {
   try {
@@ -72,7 +63,7 @@ export async function updateNote(req, res, next) {
   }
 }
 
-export const getNotes = async (req, res) => {
+export async function getAllNotes(req, res, next) {
   try {
     const { tag, search, page = 1, perPage = 10 } = req.query;
     const query = {}; 
@@ -115,6 +106,6 @@ export const getNotes = async (req, res) => {
     });
     
   } catch (error) {
-    res.status(500).json({ message: 'Внутрішня помилка сервера', error: error.message });
+    next(error);
   }
-};
+}
