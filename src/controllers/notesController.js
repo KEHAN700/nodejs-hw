@@ -66,34 +66,43 @@ export async function updateNote(req, res, next) {
 export async function getAllNotes(req, res, next) {
   try {
     const { tag, search, page = 1, perPage = 10 } = req.query;
-    const query = {}; 
+
+    // Побудова запиту через ланцюжок методів Mongoose
+    let notesQuery = Note.find();
 
     if (tag) {
-      query.tag = tag;
+      notesQuery = notesQuery.where('tag').equals(tag);
     }
     
     if (search) {
-      query.$text = { $search: search };
-    } 
+      notesQuery = notesQuery.or([
+        { title: { $regex: search, $options: 'i' } },
+        { content: { $regex: search, $options: 'i' } }
+      ]);
+    }
 
-    // Підрахунок загальної кількості нотаток
-    const totalNotes = await Note.countDocuments(query);
+    // Підрахунок загальної кількості нотаток з тими ж фільтрами
+    const countQuery = Note.find();
+    if (tag) {
+      countQuery.where('tag').equals(tag);
+    }
+    if (search) {
+      countQuery.or([
+        { title: { $regex: search, $options: 'i' } },
+        { content: { $regex: search, $options: 'i' } }
+      ]);
+    }
+    const totalNotes = await countQuery.countDocuments();
 
     // Обчислення пагінації
     const skip = (page - 1) * perPage;
     const totalPages = Math.ceil(totalNotes / perPage);
 
-    let notesQuery = Note.find(query)
+    // Застосування пагінації та сортування
+    notesQuery = notesQuery
+      .sort({ createdAt: -1 })
       .skip(skip)
       .limit(perPage);
-
-    if (search) {
-      notesQuery = notesQuery
-        .select({ score: { $meta: 'textScore' } })
-        .sort({ score: { $meta: 'textScore' } });
-    } else {
-      notesQuery = notesQuery.sort({ createdAt: -1 });
-    }
 
     const notes = await notesQuery;
 
