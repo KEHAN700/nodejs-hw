@@ -71,3 +71,50 @@ export async function updateNote(req, res, next) {
     next(error);
   }
 }
+
+export const getNotes = async (req, res) => {
+  try {
+    const { tag, search, page = 1, perPage = 10 } = req.query;
+    const query = {}; 
+
+    if (tag) {
+      query.tag = tag;
+    }
+    
+    if (search) {
+      query.$text = { $search: search };
+    } 
+
+    // Підрахунок загальної кількості нотаток
+    const totalNotes = await Note.countDocuments(query);
+
+    // Обчислення пагінації
+    const skip = (page - 1) * perPage;
+    const totalPages = Math.ceil(totalNotes / perPage);
+
+    let notesQuery = Note.find(query)
+      .skip(skip)
+      .limit(perPage);
+
+    if (search) {
+      notesQuery = notesQuery
+        .select({ score: { $meta: 'textScore' } })
+        .sort({ score: { $meta: 'textScore' } });
+    } else {
+      notesQuery = notesQuery.sort({ createdAt: -1 });
+    }
+
+    const notes = await notesQuery;
+
+    res.status(200).json({
+      page: Number(page),
+      perPage: Number(perPage),
+      totalNotes,
+      totalPages,
+      notes
+    });
+    
+  } catch (error) {
+    res.status(500).json({ message: 'Внутрішня помилка сервера', error: error.message });
+  }
+};
