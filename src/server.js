@@ -8,7 +8,6 @@ import { connectMongoDB } from './db/connectMongoDB.js';
 import { notFoundHandler } from './middleware/notFoundHandler.js';
 import { errorHandler } from './middleware/errorHandler.js';
 import notesRouter from "./routes/notesRoutes.js";
-import { errors } from "celebrate";
 import authRoutes from './routes/authRoutes.js';
 
 await connectMongoDB();
@@ -24,7 +23,6 @@ app.use(cookieParser());
 app.use('/auth', authRoutes);
 app.use(notesRouter);
 app.use(notFoundHandler); 
-app.use(errors());
 app.use(errorHandler);
 
 const PORT = process.env.PORT || 3000;

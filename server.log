@@ -1,0 +1,11 @@
+◇ injected env (5) from .env // tip: ⌘ enable debugging { debug: true }
+✅ MongoDB connection established successfully
+Mounting /auth routes...
+Server is running on port 3000
+=== REQUEST ===
+Method: POST
+URL: /auth/register
+next type: function
+registerUser called
+next type: function
+next is: [Function: next]

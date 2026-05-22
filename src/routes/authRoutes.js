@@ -1,6 +1,5 @@
 import express from 'express';
-
-import { celebrate, Segments } from 'celebrate';
+import { celebrate } from 'celebrate';
 
 import {
   registerUser,
@@ -16,28 +15,9 @@ import {
 
 const router = express.Router();
 
-router.post(
-  '/register',
-
-  celebrate({
-    [Segments.BODY]: registerUserSchema,
-  }),
-
-  registerUser,
-);
-
-router.post(
-  '/login',
-
-  celebrate({
-    [Segments.BODY]: loginUserSchema,
-  }),
-
-  loginUser,
-);
-
+router.post('/register', celebrate(registerUserSchema), registerUser);
+router.post('/login', celebrate(loginUserSchema), loginUser);
 router.post('/refresh', refreshUserSession);
-
 router.post('/logout', logoutUser);
 
 export default router;
