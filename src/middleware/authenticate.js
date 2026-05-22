@@ -1,19 +1,21 @@
-import jwt from 'jsonwebtoken';
 import createHttpError from 'http-errors';
 
 import { Session } from '../models/session.js';
 import { User } from '../models/user.js';
 
 export const authenticate = async (req, res, next) => {
-  const { accessToken } = req.cookies;
-
+  const { accessToken, sessionId } = req.cookies;
 
   if (!accessToken) {
     return next(createHttpError(401, 'Missing access token'));
   }
 
+  if (!sessionId) {
+    return next(createHttpError(401, 'Missing session id'));
+  }
 
   const session = await Session.findOne({
+    _id: sessionId,
     accessToken,
   });
 
@@ -21,20 +23,16 @@ export const authenticate = async (req, res, next) => {
     return next(createHttpError(401, 'Session not found'));
   }
 
-
-  try {
-    jwt.verify(accessToken, process.env.JWT_ACCESS_SECRET);
-  } catch (error) {
+  // Перевірка терміну дії access токена
+  if (new Date() > session.accessTokenValidUntil) {
     return next(createHttpError(401, 'Access token expired'));
   }
-
 
   const user = await User.findById(session.userId);
 
   if (!user) {
     return next(createHttpError(401));
   }
-
 
   req.user = user;
 

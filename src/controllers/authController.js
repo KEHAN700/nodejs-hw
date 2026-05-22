@@ -1,5 +1,4 @@
 import bcrypt from 'bcrypt';
-import jwt from 'jsonwebtoken';
 import createHttpError from 'http-errors';
 
 import { User } from '../models/user.js';
@@ -88,22 +87,26 @@ export const refreshUserSession = async (req, res, next) => {
       return next(createHttpError(401, 'Session not found'));
     }
 
-    try {
-      jwt.verify(
-        refreshToken,
-        process.env.JWT_REFRESH_SECRET,
-      );
-    } catch (error) {
+    // Перевірка терміну дії refresh токена
+    if (new Date() > session.refreshTokenValidUntil) {
+      // Видаляємо стару сесію
+      await Session.deleteOne({ _id: session._id });
+      
+      // Очищаємо cookies
+      res.clearCookie('sessionId');
+      res.clearCookie('accessToken');
+      res.clearCookie('refreshToken');
+      
       return next(createHttpError(401, 'Session token expired'));
     }
 
-
+    // Видаляємо стару сесію
     await Session.deleteOne({ _id: session._id });
 
-    // создаём новую
+    // Створюємо нову сесію
     const newSession = await createSession(session.userId);
 
-
+    // Встановлюємо нові cookies
     setSessionCookies(res, newSession);
 
     res.status(200).json({

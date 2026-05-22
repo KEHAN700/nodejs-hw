@@ -1,22 +1,10 @@
-import jwt from 'jsonwebtoken';
+import crypto from 'crypto';
 import { Session } from '../models/session.js';
 import { FIFTEEN_MINUTES, ONE_DAY } from '../constants/time.js';
 
-const ACCESS_TOKEN_EXPIRES_IN = '15m';
-const REFRESH_TOKEN_EXPIRES_IN = '1d';
-
 export const createSession = async (userId) => {
-  const accessToken = jwt.sign(
-    { userId },
-    process.env.JWT_ACCESS_SECRET,
-    { expiresIn: ACCESS_TOKEN_EXPIRES_IN },
-  );
-
-  const refreshToken = jwt.sign(
-    { userId },
-    process.env.JWT_REFRESH_SECRET,
-    { expiresIn: REFRESH_TOKEN_EXPIRES_IN },
-  );
+  const accessToken = crypto.randomBytes(30).toString('base64');
+  const refreshToken = crypto.randomBytes(30).toString('base64');
 
   const session = await Session.create({
     userId,
@@ -32,8 +20,8 @@ export const createSession = async (userId) => {
 export const setSessionCookies = (res, session) => {
   const cookieOptions = {
     httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
-    sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+    secure: true,
+    sameSite: 'none',
   };
 
   res.cookie('accessToken', session.accessToken, {
