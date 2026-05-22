@@ -21,7 +21,7 @@ app.use(cors({
   credentials: true
 }));
 app.use(cookieParser());
-app.use('/auth', authRoutes);
+app.use(authRoutes);
 app.use(notesRouter);
 app.use(notFoundHandler);
 app.use(errors());
