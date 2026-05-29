@@ -9,6 +9,7 @@ import { notFoundHandler } from './middleware/notFoundHandler.js';
 import { errorHandler } from './middleware/errorHandler.js';
 import notesRouter from "./routes/notesRoutes.js";
 import authRoutes from './routes/authRoutes.js';
+import userRouter from './routes/userRoutes.js';
 import { errors } from 'celebrate';
 
 await connectMongoDB();
@@ -22,6 +23,7 @@ app.use(cors({
 }));
 app.use(cookieParser());
 app.use(authRoutes);
+app.use(userRouter);
 app.use(notesRouter);
 app.use(notFoundHandler);
 app.use(errors());
